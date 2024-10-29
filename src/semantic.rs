@@ -46,7 +46,6 @@ impl Semantic {
     fn analyze_stmts(&self, stmts: Vec<Stmt>, scope: Scope) -> Result<(), String> {
         let mut scope = scope;
         for stmt in stmts {
-            println!("{:?}", scope);
             match stmt {
                 Stmt::Assignment(name, expr) => {
                     if self.func_exists(&scope, name.clone()) {
