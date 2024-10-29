@@ -6,6 +6,7 @@ pub enum KeywordType {
     Else,
     While,
     Function,
+    VarDef,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -50,6 +51,7 @@ pub struct Lexer {
 impl Lexer {
     fn check_identifier(&self, string: String) -> TokenType {
         match string.as_str() {
+            "looksmaxxing" => TokenType::Keyword(KeywordType::VarDef),
             "skibidi" => TokenType::Keyword(KeywordType::Function),
             "edge" => TokenType::Keyword(KeywordType::While),
             "sus" => TokenType::Keyword(KeywordType::If),

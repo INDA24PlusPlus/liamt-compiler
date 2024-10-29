@@ -20,11 +20,18 @@ pub struct BinaryExpr {
 
 #[derive(Debug, Clone)]
 pub enum Stmt {
-    Assignment(String, Expr),
+    Assignment(AssignmentStmt),
     If(IfStmt),
     While(WhileStmt),
     Function(FunctionStmt),
     Return(Box<Option<Expr>>),
+}
+
+#[derive(Debug, Clone)]
+pub struct AssignmentStmt {
+    pub definition: bool,
+    pub name: String,
+    pub expr: Expr,
 }
 
 #[derive(Debug, Clone)]
@@ -150,14 +157,22 @@ impl Parser {
                 if self.peek().unwrap().token_type == TokenType::LeftParan {
                     let expr = self.parse_expr()?;
                     self.expect(TokenType::Pipe)?;
-                    Ok(Stmt::Assignment("_".to_string(), expr)) // Assign to a temporary variable
+                    Ok(Stmt::Assignment(AssignmentStmt {
+                        definition: false,
+                        name: "_".to_string(), // Assign to a temporary variable
+                        expr,
+                    }))
                 } else {
                     let ident = i;
                     self.idx += 1;
                     self.expect(TokenType::Assignment)?;
                     let expr = self.parse_expr()?;
                     self.expect(TokenType::Pipe)?;
-                    Ok(Stmt::Assignment(ident, expr))
+                    Ok(Stmt::Assignment(AssignmentStmt {
+                        definition: false,
+                        name: ident,
+                        expr,
+                    }))
                 }
             }
             TokenType::Return => {
@@ -172,6 +187,19 @@ impl Parser {
                 }
             }
             TokenType::Keyword(k) => match k {
+                KeywordType::VarDef => {
+                    self.idx += 1;
+                    let name =
+                        self.expect_with_value::<String>(TokenType::Identifier("".to_string()))?;
+                    self.expect(TokenType::Assignment)?;
+                    let expr = self.parse_expr()?;
+                    self.expect(TokenType::Pipe)?;
+                    Ok(Stmt::Assignment(AssignmentStmt {
+                        definition: true,
+                        name,
+                        expr,
+                    }))
+                }
                 KeywordType::If => {
                     self.idx += 1;
                     let condition: Expr = self.parse_expr()?;

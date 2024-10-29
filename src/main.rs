@@ -1,13 +1,16 @@
+mod codegen;
 mod lexer;
 mod parser;
 mod semantic;
+
+use codegen::*;
 use lexer::*;
 use parser::*;
 use semantic::*;
 
 fn main() {
     let code = r#"
-        lol = 123|
+        looksmaxxing lol = 123|
 
         skibidi fib(n) >>
             sus n == 0 >>
@@ -21,9 +24,9 @@ fn main() {
             << 
         <<
 
-        i = 0|
+        looksmaxxing i = 0|
         edge (i != 10) >>
-            a = fib(i)|
+            looksmaxxing a = fib(i)|
             print(a)|
 
             i = i rizz 1|
@@ -49,7 +52,7 @@ fn main() {
 
     println!("{:#?}", prog.clone().unwrap());
 
-    let sem = Semantic::new(prog.unwrap()).analyze();
+    let sem = Semantic::new(prog.clone().unwrap()).analyze();
 
     if sem.is_err() {
         println!("Semantic analysis error: {:?}", sem.err().unwrap());
@@ -57,4 +60,13 @@ fn main() {
     }
 
     println!("Semantic analysis successful");
+
+    let code = CodeGenerator::new(prog.unwrap()).generate();
+
+    if code.is_err() {
+        println!("Code generation error: {:?}", code.err().unwrap());
+        return;
+    }
+
+    println!("{}", code.unwrap());
 }

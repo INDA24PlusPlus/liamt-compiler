@@ -1,5 +1,5 @@
 <program> ::= <statement>+
-<statement> ::= (<ret> | <if> | <else> | <while> | <function> | <assignment> | <stmt_call>) <s>
+<statement> ::= (<ret> | <if> | <else> | <while> | <function> | <definition> | <assignment> | <stmt_call>) <s>
 <s> ::= (" " | "\n")*
 <number> ::= ("0" |  [1-9] [0-9]*)
 <var> ::= [a-z]+
@@ -9,6 +9,7 @@
 <else> ::= "sussy" <s> ">>" <s> <statement>* <s> "<<"
 <while> ::= "edge" <s> <expr> <s> ">>" <s> <statement>* <s> "<<"
 <function> ::= "skibidi" <s> <var> "(" (<var> <s> ","? <s>)*  ")" <s> ">>" <s> <statement>* <s> "<<"
+<definition> ::= "looksmaxxing" <s> <assignment>
 <assignment> ::= <var> <s> "=" <s> <expr> <s> "|"
 <stmt_call> ::= <call> <s> "|"
 <call> ::= <var> "(" <s> <expr> <s> ")" 
@@ -18,3 +19,4 @@
 <mul_div_expr> ::= <equals_expr> ( <s> ("gyatt" | "mog") <s> <equals_expr>)?
 <equals_expr> ::= <primary_expr> ( <s> ("==" | "!=") <s> <primary_expr>)?
 <primary_expr> ::= (<number> | <call> | <var> | "(" <s> <expr> <s> ")")
+

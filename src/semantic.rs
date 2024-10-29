@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::lexer::*;
 use crate::parser::*;
 
 #[derive(Debug, Clone)]
@@ -18,11 +17,11 @@ impl Semantic {
         Self { program }
     }
     pub fn analyze(&self) -> Result<(), String> {
-        // Add built-in functions
         let mut scope = Scope {
-            vars: vec![],
+            vars: vec!["_".to_string()],
             funcs: HashMap::new(),
         };
+        // Add built-in functions
         scope.funcs.insert("print".to_string(), 1);
 
         self.analyze_stmts(self.program.statements.clone(), scope)?;
@@ -47,13 +46,21 @@ impl Semantic {
         let mut scope = scope;
         for stmt in stmts {
             match stmt {
-                Stmt::Assignment(name, expr) => {
-                    if self.func_exists(&scope, name.clone()) {
-                        return Err(format!("Identifier {} already defined as function", name));
+                Stmt::Assignment(ass_stmt) => {
+                    if self.func_exists(&scope, ass_stmt.name.clone()) {
+                        return Err(format!(
+                            "Identifier {} already defined as function",
+                            ass_stmt.name
+                        ));
                     }
-                    scope.vars.push(name);
 
-                    self.analyze_expr(expr, &scope)?;
+                    if ass_stmt.definition {
+                        scope.vars.push(ass_stmt.name);
+                    } else if !scope.vars.contains(&ass_stmt.name) {
+                        return Err(format!("Variable {} not defined", &ass_stmt.name));
+                    }
+
+                    self.analyze_expr(ass_stmt.expr, &scope)?;
                 }
                 Stmt::Function(func) => {
                     if self.ident_exists(&scope, func.name.clone()) {
