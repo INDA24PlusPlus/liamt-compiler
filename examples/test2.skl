@@ -1,0 +1,8 @@
+looksmaxxing i = 0|
+edge (i != 100) >>
+    print(i)|
+    sus (i == 69) >>
+        print(1337)|
+    <<
+    i = i rizz 1|
+<<

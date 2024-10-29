@@ -96,7 +96,7 @@ impl CodeGenerator {
                     OperatorType::NotEquals => "!=",
                 };
 
-                Ok(format!("{} {} {}", left, op, right))
+                Ok(format!("({} {} {})", left, op, right))
             }
             Expr::Call(name, params) => {
                 let mut code = format!("{}(", name);

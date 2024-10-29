@@ -1,0 +1,18 @@
+skibidi a(x,y,z) >>
+    sigma x rizz y rizz z|
+<<
+
+skibidi b(x,y,z) >> 
+    sigma x gyatt y gyatt z|
+<<
+
+print(a(3,3,3) fanumtax b(1,2,3))|
+
+skibidi c(x,y,z) >>
+    skibidi d(x,y,z) >>
+        sigma x fanumtax y fanumtax z|
+    <<
+    sigma x rizz d(x,y,z)|
+<<
+
+print(c(10,1,1))|

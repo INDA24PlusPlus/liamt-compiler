@@ -90,11 +90,14 @@ impl EnumExtractor<i64> for TokenType {
 }
 
 impl Parser {
-    fn current(&self) -> Option<Token> {
-        self.tokens.get(self.idx).cloned()
+    fn current(&self) -> Token {
+        self.tokens.get(self.idx).cloned().expect("Unexpected EOF")
     }
-    fn peek(&self) -> Option<Token> {
-        self.tokens.get(self.idx + 1).cloned()
+    fn peek(&self) -> Token {
+        self.tokens
+            .get(self.idx + 1)
+            .cloned()
+            .expect("Unexpected EOF")
     }
     pub fn new(tokens: Vec<Token>) -> Self {
         Parser {
@@ -104,39 +107,43 @@ impl Parser {
         }
     }
 
+    fn increment(&mut self) {
+        self.idx += 1;
+    }
+
     pub fn expect_with_value<T>(&mut self, expected: TokenType) -> Result<T, String>
     where
         TokenType: EnumExtractor<T>, // We are using the EnumExtractor trait to extract the value from the enum, only works for String and i64
         T: Clone,                    // This is needed because we are returning a clone of the value
     {
-        match self.current().unwrap().token_type.extract() {
+        match self.current().token_type.extract() {
             Some(inner)
-                if mem::discriminant(&self.current().unwrap().token_type)
+                if mem::discriminant(&self.current().token_type)
                     == mem::discriminant(&expected) =>
             {
-                self.idx += 1;
+                self.increment();
                 Ok(inner.clone())
             }
             _ => Err(format!(
                 "Expected {:?}, got {:?} at index {}",
                 expected,
-                self.current().unwrap().token_type,
-                self.current().unwrap().index
+                self.current().token_type,
+                self.current().index
             )),
         }
     }
 
     pub fn expect(&mut self, expected: TokenType) -> Result<(), String> {
         // The mem::discriminant will disregard the value of the enum and only compare the enum-type
-        if mem::discriminant(&self.current().unwrap().token_type) == mem::discriminant(&expected) {
-            self.idx += 1;
+        if mem::discriminant(&self.current().token_type) == mem::discriminant(&expected) {
+            self.increment();
             Ok(())
         } else {
             Err(format!(
                 "Expected {:?}, got {:?} at index {}",
                 expected,
-                self.current().unwrap().token_type,
-                self.current().unwrap().index
+                self.current().token_type,
+                self.current().index
             ))
         }
     }
@@ -151,10 +158,10 @@ impl Parser {
     }
 
     fn parse_stmt(&mut self) -> Result<Stmt, String> {
-        match self.current().unwrap().token_type {
+        match self.current().token_type {
             TokenType::Identifier(i) => {
                 // Check if its a function call
-                if self.peek().unwrap().token_type == TokenType::LeftParan {
+                if self.peek().token_type == TokenType::LeftParan {
                     let expr = self.parse_expr()?;
                     self.expect(TokenType::Pipe)?;
                     Ok(Stmt::Assignment(AssignmentStmt {
@@ -164,7 +171,7 @@ impl Parser {
                     }))
                 } else {
                     let ident = i;
-                    self.idx += 1;
+                    self.increment();
                     self.expect(TokenType::Assignment)?;
                     let expr = self.parse_expr()?;
                     self.expect(TokenType::Pipe)?;
@@ -176,9 +183,9 @@ impl Parser {
                 }
             }
             TokenType::Return => {
-                self.idx += 1;
-                if self.current().unwrap().token_type == TokenType::Pipe {
-                    self.idx += 1;
+                self.increment();
+                if self.current().token_type == TokenType::Pipe {
+                    self.increment();
                     Ok(Stmt::Return(Box::new(None)))
                 } else {
                     let expr = self.parse_expr()?;
@@ -188,7 +195,7 @@ impl Parser {
             }
             TokenType::Keyword(k) => match k {
                 KeywordType::VarDef => {
-                    self.idx += 1;
+                    self.increment();
                     let name =
                         self.expect_with_value::<String>(TokenType::Identifier("".to_string()))?;
                     self.expect(TokenType::Assignment)?;
@@ -201,23 +208,23 @@ impl Parser {
                     }))
                 }
                 KeywordType::If => {
-                    self.idx += 1;
+                    self.increment();
                     let condition: Expr = self.parse_expr()?;
                     self.expect(TokenType::LeftBrack)?;
 
                     let mut body = vec![];
-                    while self.current().unwrap().token_type != TokenType::RightBrack {
+                    while self.current().token_type != TokenType::RightBrack {
                         let stmt = self.parse_stmt()?;
                         body.push(stmt);
                     }
                     self.expect(TokenType::RightBrack)?;
 
                     let mut else_body = vec![];
-                    if self.current().unwrap().token_type == TokenType::Keyword(KeywordType::Else) {
-                        self.idx += 1;
+                    if self.current().token_type == TokenType::Keyword(KeywordType::Else) {
+                        self.increment();
                         self.expect(TokenType::LeftBrack)?;
 
-                        while self.current().unwrap().token_type != TokenType::RightBrack {
+                        while self.current().token_type != TokenType::RightBrack {
                             let stmt = self.parse_stmt()?;
                             else_body.push(stmt);
                         }
@@ -231,12 +238,12 @@ impl Parser {
                     }))
                 }
                 KeywordType::While => {
-                    self.idx += 1;
+                    self.increment();
                     let condition = self.parse_expr()?;
                     self.expect(TokenType::LeftBrack)?;
 
                     let mut body = vec![];
-                    while self.current().unwrap().token_type != TokenType::RightBrack {
+                    while self.current().token_type != TokenType::RightBrack {
                         let stmt = self.parse_stmt()?;
                         body.push(stmt);
                     }
@@ -245,15 +252,15 @@ impl Parser {
                     Ok(Stmt::While(WhileStmt { condition, body }))
                 }
                 KeywordType::Function => {
-                    self.idx += 1;
+                    self.increment();
                     let name =
                         self.expect_with_value::<String>(TokenType::Identifier("".to_string()))?;
 
                     self.expect(TokenType::LeftParan)?;
                     let mut params = vec![];
-                    while self.current().unwrap().token_type != TokenType::RightParan {
-                        if self.current().unwrap().token_type == TokenType::Comma {
-                            self.idx += 1;
+                    while self.current().token_type != TokenType::RightParan {
+                        if self.current().token_type == TokenType::Comma {
+                            self.increment();
                         }
                         let param_name = self
                             .expect_with_value::<String>(TokenType::Identifier("".to_string()))?;
@@ -263,7 +270,7 @@ impl Parser {
 
                     self.expect(TokenType::LeftBrack)?;
                     let mut body = vec![];
-                    while self.current().unwrap().token_type != TokenType::RightBrack {
+                    while self.current().token_type != TokenType::RightBrack {
                         let stmt = self.parse_stmt()?;
                         body.push(stmt);
                     }
@@ -274,13 +281,13 @@ impl Parser {
                 _ => Err(format!(
                     "Unexpected keyword {:?} at index {}",
                     k,
-                    self.current().unwrap().index
+                    self.current().index
                 )),
             },
             _ => Err(format!(
                 "Unexpected token {:?} at index {}",
-                self.current().unwrap().token_type,
-                self.current().unwrap().index
+                self.current().token_type,
+                self.current().index
             )),
         }
     }
@@ -301,7 +308,7 @@ impl Parser {
         while let Some(op) = self.parse_operator() {
             match op {
                 OperatorType::Addition | OperatorType::Subtraction => {
-                    self.idx += 1;
+                    self.increment();
                     let right = self.parse_mul_div_expr()?;
                     left = Expr::Binary(Box::new(BinaryExpr { left, right, op }));
                 }
@@ -318,7 +325,7 @@ impl Parser {
         while let Some(op) = self.parse_operator() {
             match op {
                 OperatorType::Multiplication | OperatorType::Division => {
-                    self.idx += 1;
+                    self.increment();
                     let right = self.parse_equals_expr()?;
                     left = Expr::Binary(Box::new(BinaryExpr { left, right, op }));
                 }
@@ -335,7 +342,7 @@ impl Parser {
         while let Some(op) = self.parse_operator() {
             match op {
                 OperatorType::Equals | OperatorType::NotEquals => {
-                    self.idx += 1;
+                    self.increment();
                     let right = self.parse_primary_expr()?;
                     left = Expr::Binary(Box::new(BinaryExpr { left, right, op }));
                 }
@@ -347,21 +354,21 @@ impl Parser {
     }
 
     fn parse_primary_expr(&mut self) -> Result<Expr, String> {
-        match self.current().unwrap().token_type {
+        match self.current().token_type {
             TokenType::Integer(value) => {
-                self.idx += 1;
+                self.increment();
                 Ok(Expr::Number(value))
             }
             TokenType::Identifier(ref name) => {
-                self.idx += 1;
+                self.increment();
                 // Check if this is a function call
-                if self.current().unwrap().token_type == TokenType::LeftParan {
-                    self.idx += 1;
+                if self.current().token_type == TokenType::LeftParan {
+                    self.increment();
                     let mut params = vec![];
-                    while self.current().unwrap().token_type != TokenType::RightParan {
+                    while self.current().token_type != TokenType::RightParan {
                         params.push(self.parse_expr()?);
-                        if self.current().unwrap().token_type == TokenType::Comma {
-                            self.idx += 1;
+                        if self.current().token_type == TokenType::Comma {
+                            self.increment();
                         }
                     }
                     self.expect(TokenType::RightParan)?;
@@ -371,21 +378,21 @@ impl Parser {
                 }
             }
             TokenType::LeftParan => {
-                self.idx += 1;
+                self.increment();
                 let expr = self.parse_expr()?;
                 self.expect(TokenType::RightParan)?;
                 Ok(expr)
             }
             _ => Err(format!(
                 "Unexpected token {:?} in expression at index {}",
-                self.current().unwrap().token_type,
-                self.current().unwrap().index
+                self.current().token_type,
+                self.current().index
             )),
         }
     }
 
     fn parse_operator(&mut self) -> Option<OperatorType> {
-        match self.current().unwrap().token_type {
+        match self.current().token_type {
             TokenType::Operator(op) => Some(op),
             _ => None,
         }
