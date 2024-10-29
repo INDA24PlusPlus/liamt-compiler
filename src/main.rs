@@ -36,16 +36,25 @@ fn main() {
     let tokens = Lexer::new(code).lex();
 
     if tokens.is_err() {
-        println!("{:?}", tokens.err().unwrap());
+        println!("Lexing error: {:?}", tokens.err().unwrap());
         return;
     }
 
     let prog = Parser::new(tokens.unwrap()).parse();
 
     if prog.is_err() {
-        println!("{:?}", prog.err().unwrap());
+        println!("Parsing error: {:?}", prog.err().unwrap());
         return;
     }
 
-    println!("{:#?}", prog.unwrap());
+    println!("{:#?}", prog.clone().unwrap());
+
+    let sem = Semantic::new(prog.unwrap()).analyze();
+
+    if sem.is_err() {
+        println!("Semantic analysis error: {:?}", sem.err().unwrap());
+        return;
+    }
+
+    println!("Semantic analysis successful");
 }
