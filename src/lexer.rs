@@ -1,5 +1,3 @@
-use std::mem;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum KeywordType {
     If,
@@ -105,6 +103,10 @@ impl Lexer {
                     continue;
                 }
                 '\n' => {
+                    self.idx += 1;
+                    continue;
+                }
+                '\r' => {
                     self.idx += 1;
                     continue;
                 }

@@ -1,5 +1,3 @@
-use core::num;
-
 use crate::{parser::*, OperatorType};
 
 pub struct CodeGenerator {

@@ -1,0 +1,21 @@
+looksmaxxing lol = 123|
+
+skibidi fib(n) >>
+    sus n == 0 >>
+        sigma 0|
+    <<
+    sus n == 1 >>
+        sigma 1|
+    << 
+    sussy >>
+        sigma fib(n fanumtax 1) rizz fib(n fanumtax 2)|
+    << 
+<<
+
+looksmaxxing i = 0|
+edge (i != 10) >>
+    looksmaxxing a = fib(i)|
+    print(a)|
+
+    i = i rizz 1|
+<<
