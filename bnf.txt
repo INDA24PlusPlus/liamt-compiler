@@ -1,22 +1,23 @@
 <program> ::= <statement>+
 <statement> ::= (<ret> | <if> | <else> | <while> | <function> | <definition> | <assignment> | <stmt_call>) <s>
 <s> ::= (" " | "\n")*
+<s_1> ::= (" " | "\n")+
 <number> ::= ("0" |  [1-9] [0-9]*)
 <var> ::= [a-z]+
 
-<ret> ::= "sigma" <s> <expr> <s> "|"
-<if> ::= "sus" <s> <expr> <s> ">>" <s> <statement>* <s> "<<"
+<ret> ::= "sigma" <s_1> <expr> <s> "|"
+<if> ::= "sus" <s_1> <expr> <s> ">>" <s> <statement>* <s> "<<"
 <else> ::= "sussy" <s> ">>" <s> <statement>* <s> "<<"
-<while> ::= "edge" <s> <expr> <s> ">>" <s> <statement>* <s> "<<"
-<function> ::= "skibidi" <s> <var> "(" (<var> <s> ","? <s>)*  ")" <s> ">>" <s> <statement>* <s> "<<"
-<definition> ::= "looksmaxxing" <s> <assignment>
+<while> ::= "edge" <s_1> <expr> <s> ">>" <s> <statement>* <s> "<<"
+<function> ::= "skibidi" <s_1> <var> "(" (<var> <s> ","? <s>)*  ")" <s> ">>" <s> <statement>* <s> "<<"
+<definition> ::= "looksmaxxing" <s_1> <assignment>
 <assignment> ::= <var> <s> "=" <s> <expr> <s> "|"
 <stmt_call> ::= <call> <s> "|"
 <call> ::= <var> "(" <s> <expr> <s> ")" 
 
 <expr> ::= <add_sub_expr>
-<add_sub_expr> ::= <mul_div_expr> ( <s> ("rizz" | "fanumtax") <s> <mul_div_expr>)?
-<mul_div_expr> ::= <equals_expr> ( <s> ("gyatt" | "mog") <s> <equals_expr>)?
-<equals_expr> ::= <primary_expr> ( <s> ("==" | "!=") <s> <primary_expr>)?
+<add_sub_expr> ::= <mul_div_expr> ( <s_1> ("rizz" | "fanumtax") <s_1> <mul_div_expr>)?
+<mul_div_expr> ::= <equals_expr> ( <s_1> ("gyatt" | "mog") <s_1> <equals_expr>)?
+<equals_expr> ::= <primary_expr> ( <s_1> ("==" | "!=") <s_1> <primary_expr>)?
 <primary_expr> ::= (<number> | <call> | <var> | "(" <s> <expr> <s> ")")
 
